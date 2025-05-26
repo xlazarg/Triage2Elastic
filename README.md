@@ -7,7 +7,7 @@ Both tools support SFTP output.
 
 ---
 
-## 🚀 Features
+## 🔧 Features
 
 - Monitors a local directory for new triage collections
 - Automatically runs `log2timeline` to parse forensic data
