@@ -14,17 +14,6 @@ Both tools support SFTP output.
 - Pushes timelines to Elasticsearch via `psort.py` 
 - Runs as a Docker container
 
-
----
-
-## 🔧 How It Works
-
-1. The container starts and listens for new collections added to `/path/to/local/triage/data`
-2. When a new collection is detected, it:
-   - Generates a `.plaso` file using `log2timeline.py`
-   - Uploads the timeline to Elasticsearch using `psort.py`
-   - Saves the `.plaso` file to `/path/to/local/triage/output`
-
 ---
 
 ## 🐳 Usage
