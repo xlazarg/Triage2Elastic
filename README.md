@@ -29,7 +29,7 @@ cd Triage2Elastic
 
 ```
 docker build \
-  --build-arg ELASTIC_IP=https://your-es-host:9200 \
+  --build-arg ELASTIC_IP=changeme \
   --build-arg ELASTIC_USER=elastic \
   --build-arg ELASTIC_PASSWORD=changeme \
   -t triage2elastic .
