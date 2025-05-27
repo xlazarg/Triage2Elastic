@@ -1,6 +1,6 @@
 # Triage2Elastic
 
-**Triage2Elastic** is a Docker-based tool that automates the processing of triage collections from Windows, Linux, and macOS systems. It uses Plaso (`log2timeline.py`) to generate supertimelines from forensic artifacts and exports them directly to Elasticsearch.
+**Triage2Elastic** is a Docker-based tool that automates the processing of triage images from Windows, Linux, and macOS systems. It uses Plaso (`log2timeline.py`) to generate supertimelines from forensic artifacts and exports them directly to Elasticsearch.
 
 For collecting triage data, it is recommended to use KAPE (Windows only) or CyLR (which also supports Linux and macOS). 
 
@@ -8,7 +8,7 @@ For collecting triage data, it is recommended to use KAPE (Windows only) or CyLR
 
 ## 🔧 Features
 
-- Monitors a local directory for new triage collections
+- Monitors a local directory for new triage images
 - Automatically runs `log2timeline` to parse forensic data
 - Pushes timelines to Elasticsearch
 - Runs as a Docker container
@@ -44,7 +44,7 @@ docker build -t triage2elastic .
 docker run -v /local/triage/data:/triage/data -v /local/triage/output:/triage/output triage2elastic
 ```
 
-###  Move the triage collection to the local input folder
+###  Move the triage image to the local input folder
 
 💡 This folder can also be specified as an SFTP output destination in KAPE or CyLR.
 
