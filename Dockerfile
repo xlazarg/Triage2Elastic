@@ -1,39 +1,33 @@
 FROM ubuntu:22.04
 
-# Set non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Set build-time ARG
-ARG ELASTIC_IP
-ENV ELASTIC_IP=${ELASTIC_IP}
-ARG ELASTIC_USER
-ENV ELASTIC_USER=${ELASTIC_USER}
-ARG ELASTIC_PASSWORD
-ENV ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+ARG ELASTIC_INDEX=plaso
+ENV ELASTIC_INDEX=${ELASTIC_INDEX}
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    software-properties-common \
-    gnupg \
-    wget \
-    curl \
-    unzip \
-    python3 \
-    python3-pip \
-    lsb-release \
-    inotify-tools \
+    software-properties-common gnupg wget curl unzip python3 python3-pip \
+    openjdk-17-jre-headless lsb-release inotify-tools apt-transport-https \
     && rm -rf /var/lib/apt/lists/*
 
-# Add Plaso PPA and install Plaso
+# Install Plaso
 RUN add-apt-repository ppa:gift/stable -y && \
     apt-get update && \
     apt-get install -y plaso-tools && \
     rm -rf /var/lib/apt/lists/*
 
-# Create necessary directory
+# Install Logstash
+RUN curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elastic.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list && \
+    apt-get update && \
+    apt-get install -y logstash && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create folders
 RUN mkdir -p /triage/data /triage/output
 
-# Copy watcher script into container
+# Copy pipeline config and watcher
+COPY pipeline.conf /etc/logstash/conf.d/pipeline.conf
 COPY watcher.sh /usr/local/bin/watcher.sh
 RUN chmod +x /usr/local/bin/watcher.sh
 
