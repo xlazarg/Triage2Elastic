@@ -1,8 +1,6 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ARG ELASTIC_INDEX=plaso
-ENV ELASTIC_INDEX=${ELASTIC_INDEX}
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
