@@ -21,7 +21,7 @@ Both tools support SFTP output.
 ###  Clone the repo
 
 ```
-git clone https://github.com/xlazarg/Triage2Elastic
+git clone https://github.com/xlazarg/Triage2Elastic.git
 cd Triage2Elastic
 ```
 
