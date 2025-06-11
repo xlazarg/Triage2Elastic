@@ -2,26 +2,53 @@
 
 WATCH_DIR="/triage/data"
 OUTPUT_DIR="/triage/output"
+PROCESSED_FILE="/tmp/processed_folders.txt"
+
+# Create processed tracking file
+touch "$PROCESSED_FILE"
 
 # Start Logstash in the background
 echo "Starting Logstash..."
-/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/pipeline.conf &
+/usr/share/logstash/bin/logstash --log.level error -f /etc/logstash/conf.d/pipeline.conf &
 
-echo "Watching for new triage folders in $WATCH_DIR..."
+echo "Watching $WATCH_DIR for new triage folders..."
 
-inotifywait -m -e close_write -e moved_to --format '%w%f' "$WATCH_DIR" | while read NEW_ITEM; do
-    if [[ -d "$NEW_ITEM" ]]; then
-        BASENAME=$(basename "$NEW_ITEM")
-        TIMESTAMP=$(date +%Y%m%d%H%M%S)
-        PLSO_FILE="$OUTPUT_DIR/${BASENAME}_${TIMESTAMP}.plaso"
-        JSON_FILE="$OUTPUT_DIR/${BASENAME}_${TIMESTAMP}.jsonl"
+# Check folder size in bytes
+get_dir_size() {
+    du -sb "$1" 2>/dev/null | cut -f1
+}
 
-        echo "Processing: $NEW_ITEM"
-        log2timeline.py --status_view none "$PLSO_FILE" "$NEW_ITEM"
+while true; do
+    for dir in "$WATCH_DIR"/*/; do
+        [ -d "$dir" ] || continue
+        BASENAME=$(basename "$dir")
 
-        echo "Exporting to JSONL: $JSON_FILE"
-        psort.py -o json_line -w "$JSON_FILE" "$PLSO_FILE"
+        # Skip already processed
+        if grep -Fxq "$BASENAME" "$PROCESSED_FILE"; then
+            continue
+        fi
 
-        echo "Done: $NEW_ITEM"
-    fi
+        # Check if folder is not being written to
+        SIZE1=$(get_dir_size "$dir")
+        sleep 5
+        SIZE2=$(get_dir_size "$dir")
+
+        if [[ "$SIZE1" -eq "$SIZE2" && "$SIZE1" -gt 0 ]]; then
+            echo "Detected complete folder: $dir"
+
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            PLSO_FILE="$OUTPUT_DIR/${BASENAME}_${TIMESTAMP}.plaso"
+            JSON_FILE="$OUTPUT_DIR/${BASENAME}_${TIMESTAMP}.jsonl"
+
+            echo "Processing with log2timeline..."
+            log2timeline.py --status_view none --storage-file "$PLSO_FILE" "$dir"
+
+            echo "Exporting to JSONL..."
+            psort.py -o json_line -w "$JSON_FILE" "$PLSO_FILE"
+
+            echo "$BASENAME" >> "$PROCESSED_FILE"
+            echo "Finished processing: $dir"
+        fi
+    done
+    sleep 5
 done
