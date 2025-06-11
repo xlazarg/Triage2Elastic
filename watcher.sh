@@ -5,7 +5,7 @@ OUTPUT_DIR="/triage/output"
 
 # Start Logstash in the background
 echo "Starting Logstash..."
-logstash -f /etc/logstash/conf.d/pipeline.conf &
+/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/pipeline.conf &
 
 echo "Watching for new triage folders in $WATCH_DIR..."
 
